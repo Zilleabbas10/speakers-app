@@ -11,7 +11,8 @@ const pageToShow = pageName => {
 };
 
 const initialState = {
-  showSpeakerSpeakingDays: false
+  showSignMeUp: true,
+  showSpeakerSpeakingDays: true
 };
 
 const App = ({ pageName }) => {

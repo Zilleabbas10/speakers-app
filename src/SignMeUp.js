@@ -1,11 +1,15 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useContext } from "react";
 import "react-toastify/dist/ReactToastify.css";
 import { ToastContainer, toast } from "react-toastify";
+import { ConfigContext } from "./App";
 
 const SignMeUp = ({ signupCallback }) => {
   useEffect(() => {
     console.log(`SignMeUp:useEffect called`);
   });
+
+  const context = useContext(ConfigContext);
+  const { showSignMeUp } = context;
 
   const [email, setEmail] = useState();
   const [emailValid, setEmailValid] = useState(false);
@@ -38,8 +42,7 @@ const SignMeUp = ({ signupCallback }) => {
   const buttonText = sendProcessing ? "processing..." : "Get Updates";
 
   //console.log("src/SignMeUp called");
-
-  return (
+  return showSignMeUp ? (
     <div className="container">
       <div>
         <ToastContainer />
@@ -68,7 +71,7 @@ const SignMeUp = ({ signupCallback }) => {
         </div>
       </div>
     </div>
-  );
+  ) : null;
 };
 
 export default SignMeUp;

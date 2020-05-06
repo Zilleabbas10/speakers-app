@@ -1,4 +1,11 @@
-import React, { useState, useEffect, useContext } from "react";
+import React, {
+  useState,
+  useEffect,
+  useContext,
+  useReducer,
+  useCallback,
+  useMemo
+} from "react";
 
 import "bootstrap/dist/css/bootstrap.min.css";
 import "../static/site.css";
@@ -7,12 +14,20 @@ import { Menu } from "../src/Menu";
 import SpeakerData from "./SpeakerData";
 import SpeakerDetail from "./SpeakerDetail";
 import { ConfigContext } from "./App";
+import SpeakersReducer from "./SpeakersReducer";
 
 const Speakers = ({}) => {
   const [speakingSaturday, setSpeakingSaturday] = useState(true);
   const [speakingSunday, setSpeakingSunday] = useState(true);
 
-  const [speakerList, setSpeakerList] = useState([]);
+  //const [speakerList, setSpeakerList] = useState([]);
+  const initialState = {
+    speakerList: []
+  };
+
+  const [state, dispatch] = useReducer(SpeakersReducer, initialState);
+  const { speakerList = [] } = state;
+
   const [isLoading, setIsLoading] = useState(true);
 
   const context = useContext(ConfigContext);
@@ -29,7 +44,13 @@ const Speakers = ({}) => {
       const speakerListServerFilter = SpeakerData.filter(({ sat, sun }) => {
         return (speakingSaturday && sat) || (speakingSunday && sun);
       });
-      setSpeakerList(speakerListServerFilter);
+      dispatch({
+        type: "SET_SPEAKERS_LIST",
+        payload: {
+          speakerList: speakerListServerFilter
+        }
+      });
+      //setSpeakerList(speakerListServerFilter);
     });
     return () => {
       console.log("cleanup");
@@ -40,13 +61,13 @@ const Speakers = ({}) => {
     setSpeakingSaturday(!speakingSaturday);
   };
 
-  const speakerListFiltered = isLoading
-    ? []
-    : speakerList
+  const newSpeakersList = useMemo(
+    () =>
+      speakerList
         .filter(
           ({ sat, sun }) => (speakingSaturday && sat) || (speakingSunday && sun)
         )
-        .sort(function(a, b) {
+        .sort((a, b) => {
           if (a.firstName < b.firstName) {
             return -1;
           }
@@ -54,26 +75,34 @@ const Speakers = ({}) => {
             return 1;
           }
           return 0;
-        });
+        }),
+    [speakingSunday, speakingSaturday, speakerList]
+  );
+
+  const speakerListFiltered = isLoading ? [] : newSpeakersList;
 
   const handleChangeSunday = () => {
     setSpeakingSunday(!speakingSunday);
   };
 
-  const heartFavoriteHandler = (e, favoriteValue) => {
+  const heartFavoriteHandler = useCallback((e, favoriteValue) => {
     e.preventDefault();
     const sessionId = parseInt(e.target.attributes["data-sessionid"].value);
-    setSpeakerList(
-      speakerList.map(item => {
-        if (item.id === sessionId) {
-          item.favorite = favoriteValue;
-          return item;
-        }
-        return item;
-      })
-    );
+    dispatch({
+      type: favoriteValue ? "FAVORITE" : "UN_FAVORITE",
+      payload: sessionId
+    });
+    // setSpeakerList(
+    //   speakerList.map(item => {
+    //     if (item.id === sessionId) {
+    //       item.favorite = favoriteValue;
+    //       return item;
+    //     }
+    //     return item;
+    //   })
+    // );
     //console.log("changing session favorte to " + favoriteValue);
-  };
+  }, []);
 
   if (isLoading) return <div>Loading...</div>;
 
