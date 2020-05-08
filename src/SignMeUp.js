@@ -9,7 +9,7 @@ const SignMeUp = ({ signupCallback }) => {
   });
 
   const context = useContext(ConfigContext);
-  const { showSignMeUp } = context;
+  const { showSignMeUp, loggedInUserEmail } = context;
 
   const [email, setEmail] = useState();
   const [emailValid, setEmailValid] = useState(false);
@@ -41,6 +41,18 @@ const SignMeUp = ({ signupCallback }) => {
 
   const buttonText = sendProcessing ? "processing..." : "Get Updates";
 
+  if (loggedInUserEmail) {
+    return (
+      <div className="container">
+        <div className="content">
+          <span>Logged in User Email: {loggedInUserEmail}</span>
+          &nbsp;&nbsp;
+          <a href="/logout">Logout</a>
+        </div>
+      </div>
+    );
+  }
+
   //console.log("src/SignMeUp called");
   return showSignMeUp ? (
     <div className="container">
@@ -68,6 +80,7 @@ const SignMeUp = ({ signupCallback }) => {
           >
             {buttonText}
           </button>
+          &nbsp;&nbsp;<a href="/login">Login</a>
         </div>
       </div>
     </div>
